@@ -1,8 +1,9 @@
+import { Analytics } from "@vercel/analytics/next";
 import { Geist_Mono, Source_Sans_3 } from "next/font/google";
-
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
@@ -32,6 +33,8 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
