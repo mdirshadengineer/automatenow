@@ -1,16 +1,30 @@
 # AutomateNow
 
-AutomateNow - Automate Work. Accelerate Growth.
+**Automate Work. Accelerate Growth.**
 
-Built with **Next.js 16** (canary), **React 19**, **Tailwind CSS v4**, **shadcn/ui** (Radix Nova), and **TypeScript**.
+AutomateNow is an early-stage automation and workflow platform currently being built on the bleeding edge of the React/Next.js ecosystem.
 
-## Getting started
+## Status
 
-```bash
-bun dev
-```
+The project is scaffolded and configured with production-grade tooling and integrations, but **application-level features are under active development**. The home page and Sentry example page are the only routes serving content so far.
 
-Open [http://localhost:3000](http://localhost:3000).
+## Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org/) (canary) |
+| **UI** | [React 19](https://react.dev/), [shadcn/ui](https://ui.shadcn.com/) (Radix Nova), [Tabler Icons](https://tabler.io/icons) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/), oklch CSS variables |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) (strict) |
+| **Runtime** | [Bun](https://bun.sh/) |
+| **Linter / Formatter** | [Biome](https://biomejs.dev/) v2.x |
+| **Animation** | `tw-animate-css` |
+
+## Integrations
+
+- **Sentry** — Error monitoring with session replay, performance tracing, and user feedback
+- **Vercel** — Deployed with Analytics & Speed Insights
+- **Supabase** — PostgreSQL database provisioned (integration in progress)
 
 ## Scripts
 
@@ -23,6 +37,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `bun run format` | Format with Biome |
 | `bun run typecheck` | Run TypeScript type checking |
 
+## Design System
+
+- **Primary color:** Warm gold / honey amber (oklch color space)
+- **Fonts:** Source Sans 3 (body) + Geist Mono (code)
+- **Theme:** Dark/light mode via `next-themes`, toggle with <kbd>d</kbd> key
+
 ## Adding shadcn/ui components
 
 ```bash
@@ -34,11 +54,3 @@ Components are placed in `components/ui/` and imported as:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
-
-## Stack
-
-- **Framework**: Next.js 16 (canary)
-- **UI**: React 19, shadcn/ui (Radix Nova)
-- **Styling**: Tailwind CSS v4, CSS variables (oklch)
-- **Icons**: Tabler Icons
-- **Tooling**: Biome (linter + formatter), TypeScript (strict), Bun

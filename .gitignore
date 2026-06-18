@@ -42,3 +42,6 @@ next-env.d.ts
 # Sentry examples
 app/api/sentry-example-api/route.ts
 app/sentry-example-page
+
+# supabase
+supabase/.temp
