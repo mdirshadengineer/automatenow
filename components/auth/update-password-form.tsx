@@ -1,8 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { IconLock } from "@tabler/icons-react";
-import { type } from "arktype";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,29 +19,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUpdatePasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 import { updatePasswordSchema } from "@/lib/validation";
+import { createArkValidator } from "@/lib/validation-adapters";
 
 export function UpdatePasswordForm() {
-  const [password, setPassword] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const updatePassword = useUpdatePasswordMutation();
 
-  function handleUpdatePassword(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldErrors({});
-
-    const parsed = updatePasswordSchema({ password });
-    if (parsed instanceof type.errors) {
-      setFieldErrors(
-        Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
-      );
-      return;
-    }
-
-    updatePassword.mutate({ password });
-  }
-
-  const error =
-    updatePassword.error instanceof Error ? updatePassword.error.message : null;
+  const form = useForm({
+    defaultValues: {
+      password: "",
+    },
+    validators: {
+      onSubmit: createArkValidator(updatePasswordSchema),
+    },
+    onSubmit: async ({ value }) => {
+      await updatePassword.mutateAsync(value);
+    },
+  });
 
   return (
     <Card className="w-full">
@@ -51,32 +43,46 @@ export function UpdatePasswordForm() {
         <CardDescription>Enter your new password below</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleUpdatePassword} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="password">New password</FieldLabel>
-            <FieldContent>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your new password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <FieldError>{fieldErrors.password}</FieldError>
-            </FieldContent>
-          </Field>
-
-          <FieldError>{error}</FieldError>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <form.Field name="password">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="password"
+                    placeholder="Enter your new password"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
           <Button
             type="submit"
-            disabled={updatePassword.isPending}
+            disabled={form.state.isSubmitting}
             className="w-full"
           >
             <IconLock className="size-4" />
-            {updatePassword.isPending ? "Updating..." : "Update password"}
+            {form.state.isSubmitting ? "Updating..." : "Update password"}
           </Button>
         </form>
       </CardContent>

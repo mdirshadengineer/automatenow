@@ -1,8 +1,9 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { IconSend } from "@tabler/icons-react";
-import { type } from "arktype";
 import { useState } from "react";
+import { AuthFormError } from "@/components/auth/auth-form-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,37 +21,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { useResetPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 import { forgotPasswordSchema } from "@/lib/validation";
+import { createArkValidator } from "@/lib/validation-adapters";
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const resetPassword = useResetPasswordMutation();
 
-  function handleReset(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldErrors({});
-
-    const parsed = forgotPasswordSchema({ email });
-    if (parsed instanceof type.errors) {
-      setFieldErrors(
-        Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
-      );
-      return;
-    }
-
-    resetPassword.mutate(
-      { email },
-      {
-        onSuccess: () => {
-          setSent(true);
-        },
-      },
-    );
-  }
-
-  const error =
-    resetPassword.error instanceof Error ? resetPassword.error.message : null;
+  const form = useForm({
+    defaultValues: {
+      email: "",
+    },
+    validators: {
+      onSubmit: createArkValidator(forgotPasswordSchema),
+    },
+    onSubmit: async ({ value }) => {
+      await resetPassword.mutateAsync(value);
+      setSent(true);
+    },
+  });
 
   if (sent) {
     return (
@@ -59,7 +47,9 @@ export function ForgotPasswordForm() {
           <CardTitle>Check your email</CardTitle>
           <CardDescription>
             We&apos;ve sent a password reset link to{" "}
-            <span className="font-medium text-foreground">{email}</span>
+            <span className="font-medium text-foreground">
+              {form.getFieldValue("email")}
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,6 +58,7 @@ export function ForgotPasswordForm() {
             className="w-full"
             onClick={() => {
               setSent(false);
+              form.reset();
               resetPassword.reset();
             }}
           >
@@ -87,32 +78,50 @@ export function ForgotPasswordForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleReset} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <FieldContent>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-              <FieldError>{fieldErrors.email}</FieldError>
-            </FieldContent>
-          </Field>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <form.Field name="email">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    placeholder="name@example.com"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="email"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <FieldError>{error}</FieldError>
+          <AuthFormError error={resetPassword.error} />
 
           <Button
             type="submit"
-            disabled={resetPassword.isPending}
+            disabled={form.state.isSubmitting}
             className="w-full"
           >
             <IconSend className="size-4" />
-            {resetPassword.isPending ? "Sending link..." : "Send reset link"}
+            {form.state.isSubmitting
+              ? "Sending link..."
+              : "Send reset link"}
           </Button>
         </form>
 

@@ -1,8 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { IconMail } from "@tabler/icons-react";
-import { type } from "arktype";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,29 +19,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSignInMutation } from "@/hooks/mutations/use-auth-mutations";
 import { loginSchema } from "@/lib/validation";
+import { createArkValidator } from "@/lib/validation-adapters";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const signIn = useSignInMutation();
 
-  function handleEmailLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldErrors({});
-
-    const parsed = loginSchema({ email, password });
-    if (parsed instanceof type.errors) {
-      setFieldErrors(
-        Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
-      );
-      return;
-    }
-
-    signIn.mutate({ email, password });
-  }
-
-  const error = signIn.error instanceof Error ? signIn.error.message : null;
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: createArkValidator(loginSchema),
+    },
+    onSubmit: async ({ value }) => {
+      await signIn.mutateAsync(value);
+    },
+  });
 
   return (
     <Card className="w-full">
@@ -51,52 +44,80 @@ export function LoginForm() {
         <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <form onSubmit={handleEmailLogin} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <FieldContent>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-              <FieldError>{fieldErrors.email}</FieldError>
-            </FieldContent>
-          </Field>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <form.Field name="email">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    placeholder="name@example.com"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="email"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <Field>
-            <FieldLabel htmlFor="password">
-              <span>Password</span>
-              <a
-                href="/forgot-password"
-                className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:underline"
-              >
-                Forgot password?
-              </a>
-            </FieldLabel>
-            <FieldContent>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
-              <FieldError>{fieldErrors.password}</FieldError>
-            </FieldContent>
-          </Field>
+          <form.Field name="password">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>
+                  <span>Password</span>
+                  <a
+                    href="/forgot-password"
+                    className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="password"
+                    placeholder="Enter your password"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="current-password"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <FieldError>{error}</FieldError>
-
-          <Button type="submit" disabled={signIn.isPending} className="w-full">
+          <Button
+            type="submit"
+            disabled={form.state.isSubmitting}
+            className="w-full"
+          >
             <IconMail className="size-4" />
-            {signIn.isPending ? "Signing in..." : "Sign in with email"}
+            {form.state.isSubmitting ? "Signing in..." : "Sign in with email"}
           </Button>
         </form>
 

@@ -51,7 +51,7 @@ export async function signOut() {
 export async function resetPasswordForEmail({ email }: ForgotPasswordInput) {
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/update-password`,
+    redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
   });
 
   if (error) {
@@ -62,6 +62,19 @@ export async function resetPasswordForEmail({ email }: ForgotPasswordInput) {
 export async function updatePassword({ password }: UpdatePasswordInput) {
   const supabase = createClient();
   const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function resendSignupConfirmation(email: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  });
 
   if (error) {
     throw error;

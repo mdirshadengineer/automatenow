@@ -1,8 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
 import { IconMailPlus } from "@tabler/icons-react";
-import { type } from "arktype";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,30 +18,28 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSignUpMutation } from "@/hooks/mutations/use-auth-mutations";
-import { signupSchema } from "@/lib/validation";
+import { signupFormSchema } from "@/lib/validation";
+import { createArkValidator } from "@/lib/validation-adapters";
 
 export function SignupForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const signUp = useSignUpMutation();
 
-  function handleSignup(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldErrors({});
-
-    const parsed = signupSchema({ email, password });
-    if (parsed instanceof type.errors) {
-      setFieldErrors(
-        Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
-      );
-      return;
-    }
-
-    signUp.mutate({ email, password });
-  }
-
-  const error = signUp.error instanceof Error ? signUp.error.message : null;
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validators: {
+      onSubmit: createArkValidator(signupFormSchema),
+    },
+    onSubmit: async ({ value }) => {
+      await signUp.mutateAsync({
+        email: value.email,
+        password: value.password,
+      });
+    },
+  });
 
   return (
     <Card className="w-full">
@@ -53,44 +50,100 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSignup} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <FieldContent>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-              <FieldError>{fieldErrors.email}</FieldError>
-            </FieldContent>
-          </Field>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <form.Field name="email">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    placeholder="name@example.com"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="email"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <FieldContent>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <FieldError>{fieldErrors.password}</FieldError>
-            </FieldContent>
-          </Field>
+          <form.Field name="password">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="password"
+                    placeholder="Create a password"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <FieldError>{error}</FieldError>
+          <form.Field name="confirmPassword">
+            {(field) => (
+              <Field key={field.name}>
+                <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="password"
+                    placeholder="Repeat your password"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    name={field.name}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => ({
+                      message: e,
+                    }))}
+                  />
+                </FieldContent>
+              </Field>
+            )}
+          </form.Field>
 
-          <Button type="submit" disabled={signUp.isPending} className="w-full">
+          <Button
+            type="submit"
+            disabled={form.state.isSubmitting}
+            className="w-full"
+          >
             <IconMailPlus className="size-4" />
-            {signUp.isPending ? "Creating account..." : "Create account"}
+            {form.state.isSubmitting
+              ? "Creating account..."
+              : "Create account"}
           </Button>
         </form>
 

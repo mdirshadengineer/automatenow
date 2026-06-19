@@ -1,16 +1,18 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
 import {
+  resendSignupConfirmation,
   resetPasswordForEmail,
   signInWithPassword,
   signOut,
   signUp,
   updatePassword,
 } from "@/lib/queries/auth";
-import { queryKeys } from "@/lib/query-keys";
 import type {
   ForgotPasswordInput,
   LoginInput,
@@ -22,18 +24,21 @@ function captureAuthError(error: unknown) {
   Sentry.captureException(error);
 }
 
+function showAuthErrorToast(error: unknown) {
+  toast.error(getAuthErrorMessage(error));
+  captureAuthError(error);
+}
+
 export function useSignInMutation() {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: (input: LoginInput) => signInWithPassword(input),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.user });
+    onSuccess: () => {
       router.push("/");
       router.refresh();
     },
-    onError: captureAuthError,
+    onError: showAuthErrorToast,
   });
 }
 
@@ -42,22 +47,20 @@ export function useSignUpMutation() {
 
   return useMutation({
     mutationFn: (input: SignupInput) => signUp(input),
-    onSuccess: () => {
-      router.push("/sign-up-success");
+    onSuccess: (_data, { email }) => {
+      router.push(`/sign-up-success?email=${encodeURIComponent(email)}`);
       router.refresh();
     },
-    onError: captureAuthError,
+    onError: showAuthErrorToast,
   });
 }
 
 export function useSignOutMutation() {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: signOut,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.user });
+    onSuccess: () => {
       router.push("/login");
       router.refresh();
     },
@@ -81,6 +84,19 @@ export function useUpdatePasswordMutation() {
       router.push("/");
       router.refresh();
     },
-    onError: captureAuthError,
+    onError: showAuthErrorToast,
+  });
+}
+
+export function useResendConfirmationMutation() {
+  return useMutation({
+    mutationFn: (email: string) => resendSignupConfirmation(email),
+    onSuccess: () => {
+      toast.success("Confirmation email sent. Check your inbox.");
+    },
+    onError: (error) => {
+      toast.error(getAuthErrorMessage(error));
+      captureAuthError(error);
+    },
   });
 }

@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-source-sans",
 });
 
 const fontMono = Geist_Mono({

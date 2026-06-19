@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/database.types";
+import { env } from "@/env";
 
 const authPaths = [
   "/login",
@@ -19,8 +20,8 @@ export async function updateSession(request: NextRequest) {
   });
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll() {
@@ -72,9 +73,20 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (claimsData?.claims?.sub && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+    const sessionAllowedAuthPaths = [
+      "/update-password",
+      "/confirm",
+      "/auth/callback",
+    ];
+    const allowsSession = sessionAllowedAuthPaths.some((path) =>
+      pathname.startsWith(path),
+    );
+
+    if (!allowsSession) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

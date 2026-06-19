@@ -10,11 +10,11 @@ Scaffolded and configured with production-grade tooling. Application features ar
 
 | Feature | Status |
 |---|---|
-| Landing page | 🔜 Next up |
-| Supabase auth (middleware(aka proxy.ts), server/client) | ✅ Integrated |
+| Landing page | 🔜 In progress |
+| Supabase auth (proxy.ts, server/client) | ✅ Integrated |
+| Auth pages (login/signup/forgot-password/update-password/confirm) | ✅ Complete |
 | Dark/light theme | ✅ Done |
 | Sentry error monitoring | ✅ Configured |
-| Auth pages (login/signup) | 🔜 Next up |
 | Workflow builder | 📋 Planned |
 
 ## Stack

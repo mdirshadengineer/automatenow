@@ -13,8 +13,8 @@ export function AuthQuerySync() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      queryClient.setQueryData(queryKeys.auth.user, session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(() => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.user });
     });
 
     return () => {

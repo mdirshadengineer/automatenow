@@ -10,7 +10,9 @@ export function TanStackDevtoolsPanel() {
   }
 
   return (
-    <TanStackDevtools
+    <TanStackDevtools config={{
+      position: "top-right"
+    }}
       plugins={[
         {
           name: "TanStack Query",
