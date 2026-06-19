@@ -7,6 +7,9 @@ const authPaths = [
   "/signup",
   "/forgot-password",
   "/update-password",
+  "/sign-up-success",
+  "/error",
+  "/confirm",
   "/auth/callback",
 ];
 

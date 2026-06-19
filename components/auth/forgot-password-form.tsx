@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { IconSend } from "@tabler/icons-react";
 import { type } from "arktype";
 import { useState } from "react";
@@ -19,21 +18,17 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
+import { useResetPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 import { forgotPasswordSchema } from "@/lib/validation";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  const resetPassword = useResetPasswordMutation();
 
-  async function handleReset(e: React.FormEvent) {
+  function handleReset(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     setFieldErrors({});
 
     const parsed = forgotPasswordSchema({ email });
@@ -41,31 +36,25 @@ export function ForgotPasswordForm() {
       setFieldErrors(
         Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
       );
-      setLoading(false);
       return;
     }
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email,
+    resetPassword.mutate(
+      { email },
       {
-        redirectTo: `${window.location.origin}/update-password`,
+        onSuccess: () => {
+          setSent(true);
+        },
       },
     );
-
-    if (resetError) {
-      Sentry.captureException(resetError);
-      setError(resetError.message);
-      setLoading(false);
-      return;
-    }
-
-    setSent(true);
-    setLoading(false);
   }
+
+  const error =
+    resetPassword.error instanceof Error ? resetPassword.error.message : null;
 
   if (sent) {
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Check your email</CardTitle>
           <CardDescription>
@@ -77,7 +66,10 @@ export function ForgotPasswordForm() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => setSent(false)}
+            onClick={() => {
+              setSent(false);
+              resetPassword.reset();
+            }}
           >
             Send again
           </Button>
@@ -87,7 +79,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Forgot password?</CardTitle>
         <CardDescription>
@@ -114,9 +106,13 @@ export function ForgotPasswordForm() {
 
           <FieldError>{error}</FieldError>
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button
+            type="submit"
+            disabled={resetPassword.isPending}
+            className="w-full"
+          >
             <IconSend className="size-4" />
-            {loading ? "Sending link..." : "Send reset link"}
+            {resetPassword.isPending ? "Sending link..." : "Send reset link"}
           </Button>
         </form>
 

@@ -1,9 +1,7 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { IconLock } from "@tabler/icons-react";
 import { type } from "arktype";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,21 +18,16 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
+import { useUpdatePasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 import { updatePasswordSchema } from "@/lib/validation";
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
+  const updatePassword = useUpdatePasswordMutation();
 
-  async function handleUpdatePassword(e: React.FormEvent) {
+  function handleUpdatePassword(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     setFieldErrors({});
 
     const parsed = updatePasswordSchema({ password });
@@ -42,27 +35,17 @@ export function UpdatePasswordForm() {
       setFieldErrors(
         Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
       );
-      setLoading(false);
       return;
     }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      password,
-    });
-
-    if (updateError) {
-      Sentry.captureException(updateError);
-      setError(updateError.message);
-      setLoading(false);
-      return;
-    }
-
-    router.push("/");
-    router.refresh();
+    updatePassword.mutate({ password });
   }
 
+  const error =
+    updatePassword.error instanceof Error ? updatePassword.error.message : null;
+
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Update password</CardTitle>
         <CardDescription>Enter your new password below</CardDescription>
@@ -87,9 +70,13 @@ export function UpdatePasswordForm() {
 
           <FieldError>{error}</FieldError>
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button
+            type="submit"
+            disabled={updatePassword.isPending}
+            className="w-full"
+          >
             <IconLock className="size-4" />
-            {loading ? "Updating..." : "Update password"}
+            {updatePassword.isPending ? "Updating..." : "Update password"}
           </Button>
         </form>
       </CardContent>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export const metadata: Metadata = {
   title: "AutomateNow - Automate Work. Accelerate Growth",
@@ -24,7 +24,7 @@ export default function Page() {
           <h1 className="font-medium">Project ready!</h1>
           <p>You may now add components and start building.</p>
           <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
+          <SignOutButton />
         </div>
         <div className="font-mono text-xs text-muted-foreground">
           (Press <kbd>d</kbd> to toggle dark mode)

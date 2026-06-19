@@ -1,5 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import { Geist_Mono, Source_Sans_3 } from "next/font/google";
+import { AppProviders } from "@/components/providers/app-providers";
 import ShadcnProvider from "@/components/shadcn-provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -34,7 +35,9 @@ export default function RootLayout({
     >
       <body>
         <ShadcnProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AppProviders>
+            <ThemeProvider>{children}</ThemeProvider>
+          </AppProviders>
         </ShadcnProvider>
         <Analytics />
         <SpeedInsights />

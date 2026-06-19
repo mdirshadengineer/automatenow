@@ -1,9 +1,7 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { IconMailPlus } from "@tabler/icons-react";
 import { type } from "arktype";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,22 +18,17 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
+import { useSignUpMutation } from "@/hooks/mutations/use-auth-mutations";
 import { signupSchema } from "@/lib/validation";
 
 export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
+  const signUp = useSignUpMutation();
 
-  async function handleSignup(e: React.FormEvent) {
+  function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     setFieldErrors({});
 
     const parsed = signupSchema({ email, password });
@@ -43,28 +36,16 @@ export function SignupForm() {
       setFieldErrors(
         Object.fromEntries(parsed.map((p) => [p.path.join("."), p.message])),
       );
-      setLoading(false);
       return;
     }
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (signUpError) {
-      Sentry.captureException(signUpError);
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    router.push("/?signup=success");
-    router.refresh();
+    signUp.mutate({ email, password });
   }
 
+  const error = signUp.error instanceof Error ? signUp.error.message : null;
+
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
@@ -107,9 +88,9 @@ export function SignupForm() {
 
           <FieldError>{error}</FieldError>
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" disabled={signUp.isPending} className="w-full">
             <IconMailPlus className="size-4" />
-            {loading ? "Creating account..." : "Create account"}
+            {signUp.isPending ? "Creating account..." : "Create account"}
           </Button>
         </form>
 
