@@ -50,7 +50,13 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not run code between createServerClient and
   // supabase.auth.getClaims().
-  const { data: claimsData } = await supabase.auth.getClaims();
+  let claimsData: Awaited<ReturnType<typeof supabase.auth.getClaims>>["data"];
+
+  try {
+    ({ data: claimsData } = await supabase.auth.getClaims());
+  } catch {
+    claimsData = null;
+  }
 
   const { pathname } = request.nextUrl;
 

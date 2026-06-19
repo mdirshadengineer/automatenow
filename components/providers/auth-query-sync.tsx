@@ -14,7 +14,7 @@ export function AuthQuerySync() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.user });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
     });
 
     return () => {

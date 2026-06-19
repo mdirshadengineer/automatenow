@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { getAuthErrorMessage, isExpectedAuthError } from "@/lib/auth-errors";
 import {
   resendSignupConfirmation,
   resetPasswordForEmail,
@@ -21,6 +21,10 @@ import type {
 } from "@/lib/validation";
 
 function captureAuthError(error: unknown) {
+  if (isExpectedAuthError(error)) {
+    return;
+  }
+
   Sentry.captureException(error);
 }
 

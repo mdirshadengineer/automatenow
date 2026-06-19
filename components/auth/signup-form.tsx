@@ -1,7 +1,8 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import { IconMailPlus } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { AuthFormError } from "@/components/auth/auth-form-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +25,16 @@ import { createArkValidator } from "@/lib/validation-adapters";
 export function SignupForm() {
   const signUp = useSignUpMutation();
 
+  const handleFieldChange = (
+    onChange: (value: string) => void,
+    value: string,
+  ) => {
+    onChange(value);
+    if (signUp.isError) {
+      signUp.reset();
+    }
+  };
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -34,12 +45,18 @@ export function SignupForm() {
       onSubmit: createArkValidator(signupFormSchema),
     },
     onSubmit: async ({ value }) => {
-      await signUp.mutateAsync({
-        email: value.email,
-        password: value.password,
-      });
+      try {
+        await signUp.mutateAsync({
+          email: value.email,
+          password: value.password,
+        });
+      } catch {
+        // onError already shows toast
+      }
     },
   });
+
+  const isSubmitting = form.state.isSubmitting || signUp.isPending;
 
   return (
     <Card className="w-full">
@@ -67,7 +84,9 @@ export function SignupForm() {
                     type="email"
                     placeholder="name@example.com"
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange(field.handleChange, e.target.value)
+                    }
                     onBlur={field.handleBlur}
                     name={field.name}
                     required
@@ -93,7 +112,9 @@ export function SignupForm() {
                     type="password"
                     placeholder="Create a password"
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange(field.handleChange, e.target.value)
+                    }
                     onBlur={field.handleBlur}
                     name={field.name}
                     required
@@ -119,7 +140,9 @@ export function SignupForm() {
                     type="password"
                     placeholder="Repeat your password"
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange(field.handleChange, e.target.value)
+                    }
                     onBlur={field.handleBlur}
                     name={field.name}
                     required
@@ -135,15 +158,11 @@ export function SignupForm() {
             )}
           </form.Field>
 
-          <Button
-            type="submit"
-            disabled={form.state.isSubmitting}
-            className="w-full"
-          >
+          <AuthFormError error={signUp.error} />
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             <IconMailPlus className="size-4" />
-            {form.state.isSubmitting
-              ? "Creating account..."
-              : "Create account"}
+            {isSubmitting ? "Creating account..." : "Create account"}
           </Button>
         </form>
 

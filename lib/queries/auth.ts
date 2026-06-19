@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import { isAuthError, type User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type {
   ForgotPasswordInput,
@@ -30,12 +30,27 @@ export async function signInWithPassword({ email, password }: LoginInput) {
   }
 }
 
+const DUPLICATE_SIGNUP_CODES = new Set(["email_exists"]);
+
 export async function signUp({ email, password }: SignupInput) {
   const supabase = createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/confirm?next=/`,
+    },
+  });
 
   if (error) {
+    if (isAuthError(error) && DUPLICATE_SIGNUP_CODES.has(error.code ?? "")) {
+      return;
+    }
     throw error;
+  }
+
+  if (data.user?.identities?.length === 0) {
+    return;
   }
 }
 
@@ -51,7 +66,7 @@ export async function signOut() {
 export async function resetPasswordForEmail({ email }: ForgotPasswordInput) {
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+    redirectTo: `${window.location.origin}/confirm?next=/update-password`,
   });
 
   if (error) {
@@ -73,7 +88,9 @@ export async function resendSignupConfirmation(email: string) {
   const { error } = await supabase.auth.resend({
     type: "signup",
     email,
-    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    options: {
+      emailRedirectTo: `${window.location.origin}/confirm?next=/`,
+    },
   });
 
   if (error) {

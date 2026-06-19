@@ -1,7 +1,9 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import { IconMail } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { AuthFormError } from "@/components/auth/auth-form-error";
+import { AuthResendConfirmation } from "@/components/auth/auth-resend-confirmation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,11 +20,22 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSignInMutation } from "@/hooks/mutations/use-auth-mutations";
+import { isEmailNotConfirmedError } from "@/lib/auth-errors";
 import { loginSchema } from "@/lib/validation";
 import { createArkValidator } from "@/lib/validation-adapters";
 
 export function LoginForm() {
   const signIn = useSignInMutation();
+
+  const handleFieldChange = (
+    onChange: (value: string) => void,
+    value: string,
+  ) => {
+    onChange(value);
+    if (signIn.isError) {
+      signIn.reset();
+    }
+  };
 
   const form = useForm({
     defaultValues: {
@@ -33,9 +46,17 @@ export function LoginForm() {
       onSubmit: createArkValidator(loginSchema),
     },
     onSubmit: async ({ value }) => {
-      await signIn.mutateAsync(value);
+      try {
+        await signIn.mutateAsync(value);
+      } catch {
+        // onError already shows toast
+      }
     },
   });
+
+  const isSubmitting = form.state.isSubmitting || signIn.isPending;
+  const showResendConfirmation =
+    signIn.error && isEmailNotConfirmedError(signIn.error);
 
   return (
     <Card className="w-full">
@@ -61,7 +82,9 @@ export function LoginForm() {
                     type="email"
                     placeholder="name@example.com"
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange(field.handleChange, e.target.value)
+                    }
                     onBlur={field.handleBlur}
                     name={field.name}
                     required
@@ -95,7 +118,9 @@ export function LoginForm() {
                     type="password"
                     placeholder="Enter your password"
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange(field.handleChange, e.target.value)
+                    }
                     onBlur={field.handleBlur}
                     name={field.name}
                     required
@@ -111,13 +136,15 @@ export function LoginForm() {
             )}
           </form.Field>
 
-          <Button
-            type="submit"
-            disabled={form.state.isSubmitting}
-            className="w-full"
-          >
+          <AuthFormError error={signIn.error} />
+
+          {showResendConfirmation ? (
+            <AuthResendConfirmation email={form.getFieldValue("email")} />
+          ) : null}
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             <IconMail className="size-4" />
-            {form.state.isSubmitting ? "Signing in..." : "Sign in with email"}
+            {isSubmitting ? "Signing in..." : "Sign in with email"}
           </Button>
         </form>
 

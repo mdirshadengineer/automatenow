@@ -18,36 +18,33 @@ export function SignUpSuccessCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-        <CardDescription>Check your email to confirm</CardDescription>
+        <CardTitle className="text-2xl">Check your email</CardTitle>
+        <CardDescription>Instructions to continue</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {email ? (
-          <>
-            <p className="text-sm text-muted-foreground">
-              We&apos;ve sent a confirmation link to{" "}
+        <p className="text-sm text-muted-foreground">
+          If an account can be created or requires verification, you&apos;ll
+          receive an email with next steps. Check your inbox and spam folder.
+          {email ? (
+            <>
+              {" "}
+              Look for an email at{" "}
               <span className="font-medium text-foreground">{email}</span>.
-              Please check your inbox (and spam) before signing in.
-            </p>
-            <AuthResendConfirmation email={email} />
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-muted-foreground">
-              You&apos;ve successfully signed up. Please check your email to
-              confirm your account before signing in.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Already confirmed?{" "}
-              <Link
-                href="/login"
-                className="underline underline-offset-4 hover:text-primary"
-              >
-                Sign in
-              </Link>
-            </p>
-          </>
-        )}
+            </>
+          ) : null}
+        </p>
+
+        {email ? <AuthResendConfirmation email={email} /> : null}
+
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="underline underline-offset-4 hover:text-primary"
+          >
+            Sign in
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );

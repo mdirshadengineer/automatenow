@@ -17,7 +17,27 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   weak_password: "Password is too weak. Use a stronger password and try again.",
 };
 
+const EXPECTED_AUTH_ERROR_CODES = new Set([
+  "email_not_confirmed",
+  "invalid_credentials",
+  "email_exists",
+  "user_banned",
+  "over_email_send_rate_limit",
+  "signup_disabled",
+  "session_not_found",
+  "same_password",
+  "weak_password",
+]);
+
 const FALLBACK_MESSAGE = "Something went wrong. Please try again.";
+
+export function isExpectedAuthError(error: unknown): boolean {
+  return (
+    isAuthError(error) &&
+    typeof error.code === "string" &&
+    EXPECTED_AUTH_ERROR_CODES.has(error.code)
+  );
+}
 
 export function getAuthErrorMessage(error: unknown): string {
   if (isAuthError(error) && error.code && AUTH_ERROR_MESSAGES[error.code]) {

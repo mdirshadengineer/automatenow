@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useResendConfirmationMutation } from "@/hooks/mutations/use-auth-mutations";
+import { useResetPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 import {
+  getAuthErrorMessage,
   isEmailRateLimitError,
   RESEND_CONFIRMATION_COOLDOWN_SECONDS,
 } from "@/lib/auth-errors";
 
-type AuthResendConfirmationProps = {
+type AuthResendPasswordResetProps = {
   email: string;
 };
 
-export function AuthResendConfirmation({ email }: AuthResendConfirmationProps) {
-  const resendConfirmation = useResendConfirmationMutation();
+export function AuthResendPasswordReset({
+  email,
+}: AuthResendPasswordResetProps) {
+  const resetPassword = useResetPasswordMutation();
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   useEffect(() => {
@@ -35,14 +39,22 @@ export function AuthResendConfirmation({ email }: AuthResendConfirmationProps) {
   }
 
   function handleResend() {
-    resendConfirmation.mutate(email, {
-      onSuccess: startResendCooldown,
-      onError: (resendError) => {
-        if (isEmailRateLimitError(resendError)) {
+    resetPassword.mutate(
+      { email },
+      {
+        onSuccess: () => {
           startResendCooldown();
-        }
+          toast.success("Reset link sent. Check your inbox.");
+        },
+        onError: (resendError) => {
+          if (isEmailRateLimitError(resendError)) {
+            startResendCooldown();
+            return;
+          }
+          toast.error(getAuthErrorMessage(resendError));
+        },
       },
-    });
+    );
   }
 
   return (
@@ -51,11 +63,11 @@ export function AuthResendConfirmation({ email }: AuthResendConfirmationProps) {
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          disabled={resendConfirmation.isPending}
+          className="w-full"
+          disabled={resetPassword.isPending}
           onClick={handleResend}
         >
-          {resendConfirmation.isPending ? "Sending..." : "Resend email"}
+          {resetPassword.isPending ? "Sending..." : "Resend email"}
         </Button>
       ) : (
         <p className="text-sm text-muted-foreground">

@@ -1,7 +1,8 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import { IconLock } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { AuthFormError } from "@/components/auth/auth-form-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,9 +33,15 @@ export function UpdatePasswordForm() {
       onSubmit: createArkValidator(updatePasswordSchema),
     },
     onSubmit: async ({ value }) => {
-      await updatePassword.mutateAsync(value);
+      try {
+        await updatePassword.mutateAsync(value);
+      } catch {
+        // onError already shows toast
+      }
     },
   });
+
+  const isSubmitting = form.state.isSubmitting || updatePassword.isPending;
 
   return (
     <Card className="w-full">
@@ -76,13 +83,11 @@ export function UpdatePasswordForm() {
             )}
           </form.Field>
 
-          <Button
-            type="submit"
-            disabled={form.state.isSubmitting}
-            className="w-full"
-          >
+          <AuthFormError error={updatePassword.error} />
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             <IconLock className="size-4" />
-            {form.state.isSubmitting ? "Updating..." : "Update password"}
+            {isSubmitting ? "Updating..." : "Update password"}
           </Button>
         </form>
       </CardContent>

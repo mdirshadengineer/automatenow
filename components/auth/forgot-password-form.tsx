@@ -1,9 +1,10 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import { IconSend } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import { AuthFormError } from "@/components/auth/auth-form-error";
+import { AuthResendPasswordReset } from "@/components/auth/auth-resend-password-reset";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,10 +36,16 @@ export function ForgotPasswordForm() {
       onSubmit: createArkValidator(forgotPasswordSchema),
     },
     onSubmit: async ({ value }) => {
-      await resetPassword.mutateAsync(value);
-      setSent(true);
+      try {
+        await resetPassword.mutateAsync(value);
+        setSent(true);
+      } catch {
+        // onError already captured in mutation
+      }
     },
   });
+
+  const isSubmitting = form.state.isSubmitting || resetPassword.isPending;
 
   if (sent) {
     return (
@@ -53,17 +60,7 @@ export function ForgotPasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              setSent(false);
-              form.reset();
-              resetPassword.reset();
-            }}
-          >
-            Send again
-          </Button>
+          <AuthResendPasswordReset email={form.getFieldValue("email")} />
         </CardContent>
       </Card>
     );
@@ -113,15 +110,9 @@ export function ForgotPasswordForm() {
 
           <AuthFormError error={resetPassword.error} />
 
-          <Button
-            type="submit"
-            disabled={form.state.isSubmitting}
-            className="w-full"
-          >
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             <IconSend className="size-4" />
-            {form.state.isSubmitting
-              ? "Sending link..."
-              : "Send reset link"}
+            {isSubmitting ? "Sending link..." : "Send reset link"}
           </Button>
         </form>
 
