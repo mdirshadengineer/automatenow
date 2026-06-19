@@ -2,11 +2,20 @@
 
 **Automate Work. Accelerate Growth.**
 
-AutomateNow is an early-stage automation and workflow platform currently being built on the bleeding edge of the React/Next.js ecosystem.
+AutomateNow is an early-stage automation and workflow platform built on the bleeding edge of the React/Next.js ecosystem. AI-powered workflows, no-code automation, and a visual builder — all being built in public.
 
 ## Status
 
-The project is scaffolded and configured with production-grade tooling and integrations, but **application-level features are under active development**. The home page and Sentry example page are the only routes serving content so far.
+Scaffolded and configured with production-grade tooling. Application features are under active development.
+
+| Feature | Status |
+|---|---|
+| Landing page | 🔜 Next up |
+| Supabase auth (middleware(aka proxy.ts), server/client) | ✅ Integrated |
+| Dark/light theme | ✅ Done |
+| Sentry error monitoring | ✅ Configured |
+| Auth pages (login/signup) | 🔜 Next up |
+| Workflow builder | 📋 Planned |
 
 ## Stack
 
@@ -22,9 +31,9 @@ The project is scaffolded and configured with production-grade tooling and integ
 
 ## Integrations
 
-- **Sentry** — Error monitoring with session replay, performance tracing, and user feedback
+- **Supabase** — Auth (session middleware, server + browser clients), PostgreSQL
+- **Sentry** — Error monitoring with session replay, performance tracing
 - **Vercel** — Deployed with Analytics & Speed Insights
-- **Supabase** — PostgreSQL database provisioned (integration in progress)
 
 ## Scripts
 
