@@ -9,8 +9,7 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "typecheck": "tsc --noEmit",
-    "supabase:generate": "supabase gen types typescript --linked > database.types.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@biomejs/biome": "2.2.0",

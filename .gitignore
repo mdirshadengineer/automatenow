@@ -45,3 +45,4 @@ app/sentry-example-page
 
 # supabase
 supabase/.temp
+supabase/config.toml
