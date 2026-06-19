@@ -43,6 +43,12 @@
       "skillPath": "skills/sentry-workflow/SKILL.md",
       "computedHash": "00a62d74aa26a9007d74532ab405b16684386e59c4121a5496f0059206683c6e"
     },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "ac9d0d69caac7de1d1e5647f3db3bcd2f13af355d6b3a78780fbf7fc80e8dca0"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
