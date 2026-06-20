@@ -42,25 +42,62 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Project Structure
 
 ```
-├── app/                    # Next.js App Router pages & API routes
-│   ├── (root)/             # Reserved route group
-│   ├── api/                # API routes
-│   └── layout.tsx          # Root layout (ThemeProvider, Analytics, fonts)
+├── app/
+│   ├── (auth)/             # Auth route group (centered card layout)
+│   │   ├── layout.tsx
+│   │   ├── login/
+│   │   ├── signup/
+│   │   ├── forgot-password/
+│   │   ├── update-password/
+│   │   ├── sign-up-success/
+│   │   ├── error/
+│   │   └── confirm/route.ts
+│   ├── (root)/             # Landing page route group
+│   │   └── page.tsx
+│   ├── auth/callback/route.ts
+│   ├── api/
+│   ├── layout.tsx          # Root layout (ThemeProvider, AppProviders, Analytics, fonts)
+│   ├── global-error.tsx    # Sentry global error boundary
+│   └── globals.css
 ├── components/
-│   └── ui/                 # shadcn/ui components (do not edit by hand)
-├── hooks/                  # React hooks (empty, add as needed)
+│   ├── auth/               # 11 auth components (login-form, signup-form, etc.)
+│   ├── landing/            # 5 landing page sections
+│   ├── providers/          # AppProviders, AuthQuerySync
+│   ├── theme/              # ThemeProvider, ThemeMenuSection
+│   ├── devtools/           # TanStack devtools (dev only)
+│   └── ui/                 # 47 shadcn/ui components (do not edit by hand)
+├── hooks/
+│   ├── mutations/          # use-auth-mutations (6 TanStack Query mutations)
+│   ├── use-user.ts         # useUser() — React Query wrapper
+│   └── use-mobile.ts       # useIsMobile() — 768px breakpoint
 ├── lib/
-│   ├── supabase/           # Supabase client & server helpers
-│   ├── utils.ts            # Utility functions (cn, etc.)
+│   ├── supabase/           # Client & server Supabase helpers
+│   ├── auth/               # redirect.ts, sentry.ts
+│   ├── queries/            # Auth API call functions
+│   ├── utils.ts            # cn() utility
+│   ├── validation.ts       # Arktype schemas (login, signup, etc.)
+│   ├── validation-adapters.ts
+│   ├── auth-errors.ts      # Error code→message map
+│   ├── query-client.ts     # Singleton QueryClient
+│   └── query-keys.ts       # Centralized query key factory
 ├── public/                 # Static assets, images
 ├── supabase/
 │   ├── config.toml         # Local Supabase config
-│   └── migrations/         # DB migrations
-├── AGENTS.md               # This file
-├── biome.json              # Biome configuration
-├── database.types.ts       # Auto-generated Supabase types
+│   └── migrations/         # DB migrations (empty)
+├── AGENTS.md
+├── biome.json
+├── components.json         # shadcn/ui config (Radix Nova, Tabler Icons)
+├── database.types.ts       # Auto-generated Supabase types (empty — no tables yet)
 ├── env.ts                  # Runtime env validation (t3-env + arktype)
-└── proxy.ts                # Next.js middleware (Supabase session)
+├── instrumentation.ts      # Server/edge Sentry init
+├── instrumentation-client.ts # Client Sentry init (Replay, Feedback, tracing)
+├── next.config.ts          # Sentry source maps, Cron, tree-shaking
+├── postcss.config.mjs      # @tailwindcss/postcss
+├── proxy.ts                # Next.js middleware (Supabase session)
+├── sentry.client.config.ts
+├── sentry.server.config.ts
+├── sentry.edge.config.ts
+└── tsconfig.json
 ```
 
 ## Conventions

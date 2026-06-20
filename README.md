@@ -10,11 +10,16 @@ Scaffolded and configured with production-grade tooling. Application features ar
 
 | Feature | Status |
 |---|---|
+| Authentication (full flow) | ✅ Complete |
+| Auth pages (login / signup / forgot-password / update-password / confirm / callback) | ✅ Complete |
+| Auth queries, mutations, validation (TanStack Query + Arktype + Sentry) | ✅ Complete |
+| Middleware session protection | ✅ Complete |
 | Landing page | 🔜 In progress |
-| Supabase auth (proxy.ts, server/client) | ✅ Integrated |
-| Auth pages (login/signup/forgot-password/update-password/confirm) | ✅ Complete |
-| Dark/light theme | ✅ Done |
-| Sentry error monitoring | ✅ Configured |
+| Dark / light / system theme | ✅ Done |
+| Sentry error monitoring (Replay, Feedback, tracing) | ✅ Complete |
+| Developer tooling (Biome, typecheck, React Query devtools) | ✅ Configured |
+| Database schema & migrations | 📋 Planned |
+| Dashboard / app shell (post-login) | 📋 Planned |
 | Workflow builder | 📋 Planned |
 
 ## Stack
