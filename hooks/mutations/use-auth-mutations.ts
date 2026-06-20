@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getAuthErrorMessage, isExpectedAuthError } from "@/lib/auth-errors";
@@ -17,6 +18,7 @@ import {
   type TurnstileProtected,
   updatePassword,
 } from "@/lib/queries/auth";
+import { queryKeys } from "@/lib/query-keys";
 import type {
   ForgotPasswordInput,
   LoginInput,
@@ -68,16 +70,22 @@ export function useSignUpMutation() {
 
 export function useSignOutMutation() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: signOut,
     onSuccess: () => {
+      queryClient.setQueryData(queryKeys.auth.user, null);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
       captureProductEvent(POSTHOG_EVENTS.AUTH_SIGNED_OUT);
       resetPostHogUser();
       router.push("/login");
       router.refresh();
     },
-    onError: captureAuthError,
+    onError: (error) => {
+      toast.error(getAuthErrorMessage(error));
+      captureAuthError(error);
+    },
   });
 }
 

@@ -7,6 +7,7 @@ export type AuthFlow =
   | "password_reset"
   | "signup_confirm"
   | "sign_in"
+  | "sign_out"
   | "sign_up"
   | "forgot_password"
   | "update_password"
