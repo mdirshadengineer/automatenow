@@ -60,12 +60,6 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (request.nextUrl.searchParams.has("code") && pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/confirm";
-    return NextResponse.redirect(url);
-  }
-
   const isAuthPage = authPaths.some((path) => pathname.startsWith(path));
   const isApiRoute = pathname.startsWith("/api");
   const isPublicAsset =
