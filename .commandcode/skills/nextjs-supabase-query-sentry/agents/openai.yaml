@@ -1,0 +1,4 @@
+interface:
+  display_name: "Next.js Supabase Query Sentry"
+  short_description: "Next.js backend, queries, and Sentry patterns"
+  default_prompt: "Use $nextjs-supabase-query-sentry to implement an AutomateNow feature with Supabase backend access, TanStack Query data fetching, and Sentry error handling."

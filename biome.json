@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -13,7 +13,9 @@
       "!.next",
       "!dist",
       "!build",
-      "!components/ui/**/*.tsx"
+      "!app/globals.css",
+      "!components/ui/**/*.tsx",
+      "!database.types.ts"
     ]
   },
   "formatter": {
@@ -24,7 +26,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noUnknownAtRules": "off"
       }

@@ -1,12 +1,15 @@
+import { Analytics } from "@vercel/analytics/next";
 import { Geist_Mono, Source_Sans_3 } from "next/font/google";
-
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { AppProviders } from "@/components/providers/app-providers";
+import ShadcnProvider from "@/components/shadcn-provider";
 import { cn } from "@/lib/utils";
+import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-source-sans",
 });
 
 const fontMono = Geist_Mono({
@@ -31,7 +34,15 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ShadcnProvider>
+          <AppProviders>
+            <ThemeProvider>{children}</ThemeProvider>
+          </AppProviders>
+        </ShadcnProvider>
+        {/* Logs performance Web Vitals to your local browser console */}
+        <SpeedInsights />
+        {/* Logs page views & custom events to your local browser console */}
+        <Analytics />
       </body>
     </html>
   );
