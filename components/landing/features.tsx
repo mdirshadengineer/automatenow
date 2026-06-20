@@ -1,4 +1,5 @@
 import { IconBrain, IconCode, IconDots, IconRocket } from "@tabler/icons-react";
+import { FeaturesViewTracker } from "@/components/landing/features-view-tracker";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -30,7 +31,11 @@ const features = [
 
 export function Features() {
   return (
-    <section className="relative py-24 sm:py-32" id="features">
+    <FeaturesViewTracker
+      featureCount={features.length}
+      className="relative py-24 sm:py-32"
+      id="features"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,var(--primary)/0.12,transparent)]"
@@ -90,6 +95,6 @@ export function Features() {
           })}
         </div>
       </div>
-    </section>
+    </FeaturesViewTracker>
   );
 }

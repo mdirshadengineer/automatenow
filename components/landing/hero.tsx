@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { TrackedLink } from "@/components/landing/tracked-link";
 
 export function Hero() {
   return (
@@ -22,18 +22,22 @@ export function Hero() {
         </p>
       </div>
       <div className="flex gap-4">
-        <Link
+        <TrackedLink
           href="/signup"
+          section="hero"
+          label="Get started free"
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
         >
           Get started free
-        </Link>
-        <Link
+        </TrackedLink>
+        <TrackedLink
           href="/login"
+          section="hero"
+          label="Sign in"
           className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-6 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           Sign in
-        </Link>
+        </TrackedLink>
       </div>
     </section>
   );

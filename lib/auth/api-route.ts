@@ -3,6 +3,7 @@ import { isAuthError } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/database.types";
 import { env } from "@/env";
+import { captureAuthRouteEvent, getAuthErrorCode } from "@/lib/auth/posthog";
 import type { AuthFlow } from "@/lib/auth/sentry";
 import { captureAuthRouteError } from "@/lib/auth/sentry";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -69,12 +70,25 @@ export function authSuccessResponse(request: NextRequest) {
   return { response, supabase: createAuthRouteClient(request, response) };
 }
 
-export function authErrorResponse(
+export async function authErrorResponse(
   error: unknown,
   flow: AuthFlow,
-  extra?: Record<string, unknown>,
+  options?: {
+    distinctId?: string;
+    extra?: Record<string, unknown>;
+  },
 ) {
-  captureAuthRouteError(error, flow, extra);
+  captureAuthRouteError(error, flow, options?.extra);
+
+  await captureAuthRouteEvent(
+    options?.distinctId ?? "anonymous",
+    flow,
+    "failure",
+    {
+      error_code: getAuthErrorCode(error),
+      ...options?.extra,
+    },
+  );
 
   if (isAuthError(error)) {
     return NextResponse.json(

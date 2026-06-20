@@ -6,6 +6,7 @@ import {
   parseTurnstileToken,
   verifyRequestTurnstile,
 } from "@/lib/auth/api-route";
+import { captureAuthRouteEvent, getAuthDistinctId } from "@/lib/auth/posthog";
 import { updatePasswordSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
@@ -31,13 +32,24 @@ export async function POST(request: NextRequest) {
   }
 
   const { response, supabase } = authSuccessResponse(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { error } = await supabase.auth.updateUser({
     password: parsed.password,
   });
 
   if (error) {
-    return authErrorResponse(error, "update_password");
+    return authErrorResponse(error, "update_password", {
+      distinctId: getAuthDistinctId(user?.id),
+    });
   }
+
+  await captureAuthRouteEvent(
+    getAuthDistinctId(user?.id),
+    "update_password",
+    "success",
+  );
 
   return response;
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TrackedLink } from "@/components/landing/tracked-link";
 
 export function Cta() {
   return (
@@ -12,12 +12,14 @@ export function Cta() {
           card required.
         </p>
         <div className="mt-8">
-          <Link
+          <TrackedLink
             href="/signup"
+            section="cta"
+            label="Start building free"
             className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
           >
             Start building free
-          </Link>
+          </TrackedLink>
         </div>
       </div>
     </section>

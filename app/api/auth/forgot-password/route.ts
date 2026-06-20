@@ -6,6 +6,7 @@ import {
   parseTurnstileToken,
   verifyRequestTurnstile,
 } from "@/lib/auth/api-route";
+import { captureAuthRouteEvent, getAuthDistinctId } from "@/lib/auth/posthog";
 import { getRequestOrigin } from "@/lib/auth/redirect";
 import { forgotPasswordSchema } from "@/lib/validation";
 
@@ -38,8 +39,16 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return authErrorResponse(error, "forgot_password");
+    return authErrorResponse(error, "forgot_password", {
+      distinctId: getAuthDistinctId(null, parsed.email),
+    });
   }
+
+  await captureAuthRouteEvent(
+    getAuthDistinctId(null, parsed.email),
+    "forgot_password",
+    "success",
+  );
 
   return response;
 }

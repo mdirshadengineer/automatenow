@@ -6,6 +6,7 @@ import {
   parseTurnstileToken,
   verifyRequestTurnstile,
 } from "@/lib/auth/api-route";
+import { captureAuthRouteEvent, getAuthDistinctId } from "@/lib/auth/posthog";
 import { loginSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
@@ -32,11 +33,19 @@ export async function POST(request: NextRequest) {
   }
 
   const { response, supabase } = authSuccessResponse(request);
-  const { error } = await supabase.auth.signInWithPassword(parsed);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed);
 
   if (error) {
-    return authErrorResponse(error, "sign_in");
+    return authErrorResponse(error, "sign_in", {
+      distinctId: getAuthDistinctId(null, parsed.email),
+    });
   }
+
+  await captureAuthRouteEvent(
+    getAuthDistinctId(data.user?.id, parsed.email),
+    "sign_in",
+    "success",
+  );
 
   return response;
 }

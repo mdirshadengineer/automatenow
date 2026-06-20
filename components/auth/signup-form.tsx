@@ -49,7 +49,7 @@ export function SignupForm() {
       confirmPassword: "",
     },
     validators: {
-      onSubmit: createArkValidator(signupFormSchema),
+      onSubmit: createArkValidator(signupFormSchema, { form: "signup" }),
     },
     onSubmit: async ({ value }) => {
       if (!turnstileToken) {
@@ -123,6 +123,7 @@ export function SignupForm() {
                     id={field.name}
                     type="password"
                     placeholder="Create a password"
+                    className="ph-no-capture"
                     value={field.state.value}
                     onChange={(e) =>
                       handleFieldChange(field.handleChange, e.target.value)
@@ -151,6 +152,7 @@ export function SignupForm() {
                     id={field.name}
                     type="password"
                     placeholder="Repeat your password"
+                    className="ph-no-capture"
                     value={field.state.value}
                     onChange={(e) =>
                       handleFieldChange(field.handleChange, e.target.value)
@@ -174,6 +176,7 @@ export function SignupForm() {
 
           <TurnstileField
             ref={turnstileRef}
+            form="signup"
             onTokenChange={setTurnstileToken}
           />
 

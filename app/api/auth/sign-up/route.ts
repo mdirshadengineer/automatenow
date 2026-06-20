@@ -7,6 +7,7 @@ import {
   parseTurnstileToken,
   verifyRequestTurnstile,
 } from "@/lib/auth/api-route";
+import { captureAuthRouteEvent, getAuthDistinctId } from "@/lib/auth/posthog";
 import { getRequestOrigin } from "@/lib/auth/redirect";
 import { signupSchema } from "@/lib/validation";
 
@@ -47,15 +48,33 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     if (isAuthError(error) && DUPLICATE_SIGNUP_CODES.has(error.code ?? "")) {
+      await captureAuthRouteEvent(
+        getAuthDistinctId(null, parsed.email),
+        "sign_up",
+        "success",
+      );
       return response;
     }
 
-    return authErrorResponse(error, "sign_up");
+    return authErrorResponse(error, "sign_up", {
+      distinctId: getAuthDistinctId(null, parsed.email),
+    });
   }
 
   if (data.user?.identities?.length === 0) {
+    await captureAuthRouteEvent(
+      getAuthDistinctId(null, parsed.email),
+      "sign_up",
+      "success",
+    );
     return response;
   }
+
+  await captureAuthRouteEvent(
+    getAuthDistinctId(data.user?.id, parsed.email),
+    "sign_up",
+    "success",
+  );
 
   return response;
 }

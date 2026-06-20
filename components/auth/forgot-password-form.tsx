@@ -39,7 +39,9 @@ export function ForgotPasswordForm() {
       email: "",
     },
     validators: {
-      onSubmit: createArkValidator(forgotPasswordSchema),
+      onSubmit: createArkValidator(forgotPasswordSchema, {
+        form: "forgot_password",
+      }),
     },
     onSubmit: async ({ value }) => {
       if (!turnstileToken) {
@@ -122,6 +124,7 @@ export function ForgotPasswordForm() {
 
           <TurnstileField
             ref={turnstileRef}
+            form="forgot_password"
             onTokenChange={setTurnstileToken}
           />
 

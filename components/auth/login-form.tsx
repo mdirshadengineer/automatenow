@@ -50,7 +50,7 @@ export function LoginForm() {
       password: "",
     },
     validators: {
-      onSubmit: createArkValidator(loginSchema),
+      onSubmit: createArkValidator(loginSchema, { form: "login" }),
     },
     onSubmit: async ({ value }) => {
       if (!turnstileToken) {
@@ -128,6 +128,7 @@ export function LoginForm() {
                     id={field.name}
                     type="password"
                     placeholder="Enter your password"
+                    className="ph-no-capture"
                     value={field.state.value}
                     onChange={(e) =>
                       handleFieldChange(field.handleChange, e.target.value)
@@ -155,6 +156,7 @@ export function LoginForm() {
 
           <TurnstileField
             ref={turnstileRef}
+            form="login"
             onTokenChange={setTurnstileToken}
           />
 

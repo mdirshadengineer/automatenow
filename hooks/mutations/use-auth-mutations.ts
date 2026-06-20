@@ -5,6 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getAuthErrorMessage, isExpectedAuthError } from "@/lib/auth-errors";
+import { captureProductEvent, resetPostHogUser } from "@/lib/posthog/client";
+import { POSTHOG_EVENTS } from "@/lib/posthog/events";
 import {
   resendPasswordReset,
   resendSignupConfirmation,
@@ -42,6 +44,7 @@ export function useSignInMutation() {
     mutationFn: (input: TurnstileProtected<LoginInput>) =>
       signInWithPassword(input),
     onSuccess: () => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_SIGNED_IN, { method: "email" });
       router.push("/");
       router.refresh();
     },
@@ -55,6 +58,7 @@ export function useSignUpMutation() {
   return useMutation({
     mutationFn: (input: TurnstileProtected<SignupInput>) => signUp(input),
     onSuccess: (_data, { email }) => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_SIGNED_UP, { method: "email" });
       router.push(`/sign-up-success?email=${encodeURIComponent(email)}`);
       router.refresh();
     },
@@ -68,6 +72,8 @@ export function useSignOutMutation() {
   return useMutation({
     mutationFn: signOut,
     onSuccess: () => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_SIGNED_OUT);
+      resetPostHogUser();
       router.push("/login");
       router.refresh();
     },
@@ -79,6 +85,11 @@ export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: (input: TurnstileProtected<ForgotPasswordInput>) =>
       resetPasswordForEmail(input),
+    onSuccess: () => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_PASSWORD_RESET_REQUESTED, {
+        method: "email",
+      });
+    },
     onError: captureAuthError,
   });
 }
@@ -98,6 +109,7 @@ export function useUpdatePasswordMutation() {
     mutationFn: (input: TurnstileProtected<UpdatePasswordInput>) =>
       updatePassword(input),
     onSuccess: () => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_PASSWORD_UPDATED);
       router.push("/");
       router.refresh();
     },
@@ -110,6 +122,9 @@ export function useResendConfirmationMutation() {
     mutationFn: (input: TurnstileProtected<{ email: string }>) =>
       resendSignupConfirmation(input),
     onSuccess: () => {
+      captureProductEvent(POSTHOG_EVENTS.AUTH_CONFIRMATION_RESENT, {
+        method: "email",
+      });
       toast.success("Confirmation email sent. Check your inbox.");
     },
     onError: (error) => {

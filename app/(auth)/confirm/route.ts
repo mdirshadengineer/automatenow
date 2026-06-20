@@ -3,11 +3,14 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/database.types";
 import { env } from "@/env";
+import { getAuthDistinctId } from "@/lib/auth/posthog";
 import { getRequestOrigin, getSafeRedirectPath } from "@/lib/auth/redirect";
 import {
   captureAuthRouteError,
   captureAuthRouteWarning,
 } from "@/lib/auth/sentry";
+import { POSTHOG_EVENTS } from "@/lib/posthog/events";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 function createAuthRouteClient(request: NextRequest, response: NextResponse) {
   return createServerClient<Database>(
@@ -97,6 +100,26 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(
       `${requestOrigin}/error?error=auth_confirm_error`,
+    );
+  }
+
+  const isEmailConfirmation =
+    hasCodeFlow ||
+    type === "signup" ||
+    type === "email" ||
+    type === "email_change";
+
+  if (isEmailConfirmation) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    await captureServerEvent(
+      getAuthDistinctId(user?.id),
+      POSTHOG_EVENTS.AUTH_EMAIL_CONFIRMED,
+      {
+        confirmation_type: hasCodeFlow ? "code" : type,
+      },
     );
   }
 

@@ -37,7 +37,9 @@ export function UpdatePasswordForm() {
       password: "",
     },
     validators: {
-      onSubmit: createArkValidator(updatePasswordSchema),
+      onSubmit: createArkValidator(updatePasswordSchema, {
+        form: "update_password",
+      }),
     },
     onSubmit: async ({ value }) => {
       if (!turnstileToken) {
@@ -77,6 +79,7 @@ export function UpdatePasswordForm() {
                     id={field.name}
                     type="password"
                     placeholder="Enter your new password"
+                    className="ph-no-capture"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -98,6 +101,7 @@ export function UpdatePasswordForm() {
 
           <TurnstileField
             ref={turnstileRef}
+            form="update_password"
             onTokenChange={setTurnstileToken}
           />
 
