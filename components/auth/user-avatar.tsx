@@ -49,7 +49,7 @@ export const UserAvatarTrigger = forwardRef<
       ref={ref}
       type="button"
       className={cn(
-        "cursor-pointer rounded-full outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex size-10 touch-manipulation items-center justify-center rounded-full outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
       aria-label={`Account menu for ${email}`}
