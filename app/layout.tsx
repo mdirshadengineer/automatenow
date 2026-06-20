@@ -39,8 +39,10 @@ export default function RootLayout({
             <ThemeProvider>{children}</ThemeProvider>
           </AppProviders>
         </ShadcnProvider>
-        <Analytics />
+        {/* Logs performance Web Vitals to your local browser console */}
         <SpeedInsights />
+        {/* Logs page views & custom events to your local browser console */}
+        <Analytics />
       </body>
     </html>
   );

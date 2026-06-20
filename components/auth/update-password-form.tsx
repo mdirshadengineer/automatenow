@@ -2,7 +2,12 @@
 
 import { IconLock } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
+import { useRef, useState } from "react";
 import { AuthFormError } from "@/components/auth/auth-form-error";
+import {
+  TurnstileField,
+  type TurnstileFieldHandle,
+} from "@/components/auth/turnstile-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +29,8 @@ import { createArkValidator } from "@/lib/validation-adapters";
 
 export function UpdatePasswordForm() {
   const updatePassword = useUpdatePasswordMutation();
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -33,10 +40,14 @@ export function UpdatePasswordForm() {
       onSubmit: createArkValidator(updatePasswordSchema),
     },
     onSubmit: async ({ value }) => {
+      if (!turnstileToken) {
+        return;
+      }
+
       try {
-        await updatePassword.mutateAsync(value);
+        await updatePassword.mutateAsync({ ...value, turnstileToken });
       } catch {
-        // onError already shows toast
+        turnstileRef.current?.reset();
       }
     },
   });
@@ -85,7 +96,16 @@ export function UpdatePasswordForm() {
 
           <AuthFormError error={updatePassword.error} />
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <TurnstileField
+            ref={turnstileRef}
+            onTokenChange={setTurnstileToken}
+          />
+
+          <Button
+            type="submit"
+            disabled={isSubmitting || !turnstileToken}
+            className="w-full"
+          >
             <IconLock className="size-4" />
             {isSubmitting ? "Updating..." : "Update password"}
           </Button>

@@ -2,9 +2,13 @@
 
 import { IconSend } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AuthFormError } from "@/components/auth/auth-form-error";
 import { AuthResendPasswordReset } from "@/components/auth/auth-resend-password-reset";
+import {
+  TurnstileField,
+  type TurnstileFieldHandle,
+} from "@/components/auth/turnstile-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +31,8 @@ import { createArkValidator } from "@/lib/validation-adapters";
 export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
   const resetPassword = useResetPasswordMutation();
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -36,11 +42,15 @@ export function ForgotPasswordForm() {
       onSubmit: createArkValidator(forgotPasswordSchema),
     },
     onSubmit: async ({ value }) => {
+      if (!turnstileToken) {
+        return;
+      }
+
       try {
-        await resetPassword.mutateAsync(value);
+        await resetPassword.mutateAsync({ ...value, turnstileToken });
         setSent(true);
       } catch {
-        // onError already captured in mutation
+        turnstileRef.current?.reset();
       }
     },
   });
@@ -110,7 +120,16 @@ export function ForgotPasswordForm() {
 
           <AuthFormError error={resetPassword.error} />
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <TurnstileField
+            ref={turnstileRef}
+            onTokenChange={setTurnstileToken}
+          />
+
+          <Button
+            type="submit"
+            disabled={isSubmitting || !turnstileToken}
+            className="w-full"
+          >
             <IconSend className="size-4" />
             {isSubmitting ? "Sending link..." : "Send reset link"}
           </Button>

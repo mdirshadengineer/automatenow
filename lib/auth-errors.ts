@@ -15,6 +15,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Your password reset link has expired or is invalid. Request a new reset link and try again.",
   same_password: "Choose a different password than your current one.",
   weak_password: "Password is too weak. Use a stronger password and try again.",
+  captcha_failed:
+    "Verification failed. Please complete the security check and try again.",
 };
 
 const EXPECTED_AUTH_ERROR_CODES = new Set([
@@ -27,6 +29,7 @@ const EXPECTED_AUTH_ERROR_CODES = new Set([
   "session_not_found",
   "same_password",
   "weak_password",
+  "captcha_failed",
 ]);
 
 const FALLBACK_MESSAGE = "Something went wrong. Please try again.";

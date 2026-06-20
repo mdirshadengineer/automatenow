@@ -2,7 +2,12 @@
 
 import { IconMailPlus } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
+import { useRef, useState } from "react";
 import { AuthFormError } from "@/components/auth/auth-form-error";
+import {
+  TurnstileField,
+  type TurnstileFieldHandle,
+} from "@/components/auth/turnstile-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +29,8 @@ import { createArkValidator } from "@/lib/validation-adapters";
 
 export function SignupForm() {
   const signUp = useSignUpMutation();
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleFieldChange = (
     onChange: (value: string) => void,
@@ -45,13 +52,18 @@ export function SignupForm() {
       onSubmit: createArkValidator(signupFormSchema),
     },
     onSubmit: async ({ value }) => {
+      if (!turnstileToken) {
+        return;
+      }
+
       try {
         await signUp.mutateAsync({
           email: value.email,
           password: value.password,
+          turnstileToken,
         });
       } catch {
-        // onError already shows toast
+        turnstileRef.current?.reset();
       }
     },
   });
@@ -160,7 +172,16 @@ export function SignupForm() {
 
           <AuthFormError error={signUp.error} />
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <TurnstileField
+            ref={turnstileRef}
+            onTokenChange={setTurnstileToken}
+          />
+
+          <Button
+            type="submit"
+            disabled={isSubmitting || !turnstileToken}
+            className="w-full"
+          >
             <IconMailPlus className="size-4" />
             {isSubmitting ? "Creating account..." : "Create account"}
           </Button>

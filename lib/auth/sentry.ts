@@ -1,11 +1,17 @@
 import * as Sentry from "@sentry/nextjs";
 import { isAuthError } from "@supabase/supabase-js";
 
-type AuthFlow =
+export type AuthFlow =
   | "pkce_callback"
   | "otp_confirm"
   | "password_reset"
-  | "signup_confirm";
+  | "signup_confirm"
+  | "sign_in"
+  | "sign_up"
+  | "forgot_password"
+  | "update_password"
+  | "resend_confirmation"
+  | "resend_password_reset";
 
 export function captureAuthRouteError(
   error: unknown,

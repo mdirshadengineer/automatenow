@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+  TurnstileField,
+  type TurnstileFieldHandle,
+} from "@/components/auth/turnstile-field";
 import { Button } from "@/components/ui/button";
-import { useResetPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
+import { useResendPasswordResetMutation } from "@/hooks/mutations/use-auth-mutations";
 import {
   getAuthErrorMessage,
   isEmailRateLimitError,
@@ -17,8 +21,10 @@ type AuthResendPasswordResetProps = {
 export function AuthResendPasswordReset({
   email,
 }: AuthResendPasswordResetProps) {
-  const resetPassword = useResetPasswordMutation();
+  const resendPasswordReset = useResendPasswordResetMutation();
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const pendingResendRef = useRef(false);
 
   useEffect(() => {
     if (cooldownSeconds <= 0) {
@@ -38,9 +44,15 @@ export function AuthResendPasswordReset({
     setCooldownSeconds(RESEND_CONFIRMATION_COOLDOWN_SECONDS);
   }
 
-  function handleResend() {
-    resetPassword.mutate(
-      { email },
+  function handleToken(token: string | null) {
+    if (!token || !pendingResendRef.current) {
+      return;
+    }
+
+    pendingResendRef.current = false;
+
+    resendPasswordReset.mutate(
+      { email, turnstileToken: token },
       {
         onSuccess: () => {
           startResendCooldown();
@@ -52,22 +64,35 @@ export function AuthResendPasswordReset({
             return;
           }
           toast.error(getAuthErrorMessage(resendError));
+          turnstileRef.current?.reset();
         },
       },
     );
   }
 
+  function handleResend() {
+    pendingResendRef.current = true;
+    turnstileRef.current?.execute();
+  }
+
   return (
     <div className="flex flex-col gap-2">
+      <TurnstileField
+        ref={turnstileRef}
+        size="invisible"
+        execution="execute"
+        onTokenChange={handleToken}
+      />
+
       {canResend ? (
         <Button
           type="button"
           variant="outline"
           className="w-full"
-          disabled={resetPassword.isPending}
+          disabled={resendPasswordReset.isPending}
           onClick={handleResend}
         >
-          {resetPassword.isPending ? "Sending..." : "Resend email"}
+          {resendPasswordReset.isPending ? "Sending..." : "Resend email"}
         </Button>
       ) : (
         <p className="text-sm text-muted-foreground">

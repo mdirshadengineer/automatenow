@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getAuthErrorMessage, isExpectedAuthError } from "@/lib/auth-errors";
 import {
+  resendPasswordReset,
   resendSignupConfirmation,
   resetPasswordForEmail,
   signInWithPassword,
   signOut,
   signUp,
+  type TurnstileProtected,
   updatePassword,
 } from "@/lib/queries/auth";
 import type {
@@ -37,7 +39,8 @@ export function useSignInMutation() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (input: LoginInput) => signInWithPassword(input),
+    mutationFn: (input: TurnstileProtected<LoginInput>) =>
+      signInWithPassword(input),
     onSuccess: () => {
       router.push("/");
       router.refresh();
@@ -50,7 +53,7 @@ export function useSignUpMutation() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (input: SignupInput) => signUp(input),
+    mutationFn: (input: TurnstileProtected<SignupInput>) => signUp(input),
     onSuccess: (_data, { email }) => {
       router.push(`/sign-up-success?email=${encodeURIComponent(email)}`);
       router.refresh();
@@ -74,7 +77,16 @@ export function useSignOutMutation() {
 
 export function useResetPasswordMutation() {
   return useMutation({
-    mutationFn: (input: ForgotPasswordInput) => resetPasswordForEmail(input),
+    mutationFn: (input: TurnstileProtected<ForgotPasswordInput>) =>
+      resetPasswordForEmail(input),
+    onError: captureAuthError,
+  });
+}
+
+export function useResendPasswordResetMutation() {
+  return useMutation({
+    mutationFn: (input: TurnstileProtected<ForgotPasswordInput>) =>
+      resendPasswordReset(input),
     onError: captureAuthError,
   });
 }
@@ -83,7 +95,8 @@ export function useUpdatePasswordMutation() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (input: UpdatePasswordInput) => updatePassword(input),
+    mutationFn: (input: TurnstileProtected<UpdatePasswordInput>) =>
+      updatePassword(input),
     onSuccess: () => {
       router.push("/");
       router.refresh();
@@ -94,7 +107,8 @@ export function useUpdatePasswordMutation() {
 
 export function useResendConfirmationMutation() {
   return useMutation({
-    mutationFn: (email: string) => resendSignupConfirmation(email),
+    mutationFn: (input: TurnstileProtected<{ email: string }>) =>
+      resendSignupConfirmation(input),
     onSuccess: () => {
       toast.success("Confirmation email sent. Check your inbox.");
     },
