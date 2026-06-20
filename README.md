@@ -1,16 +1,44 @@
 # AutomateNow
 
-AutomateNow - Automate Work. Accelerate Growth.
+**Automate Work. Accelerate Growth.**
 
-Built with **Next.js 16** (canary), **React 19**, **Tailwind CSS v4**, **shadcn/ui** (Radix Nova), and **TypeScript**.
+AutomateNow is an early-stage automation and workflow platform built on the bleeding edge of the React/Next.js ecosystem. AI-powered workflows, no-code automation, and a visual builder — all being built in public.
 
-## Getting started
+## Status
 
-```bash
-bun dev
-```
+Scaffolded and configured with production-grade tooling. Application features are under active development.
 
-Open [http://localhost:3000](http://localhost:3000).
+| Feature | Status |
+|---|---|
+| Authentication (full flow) | ✅ Complete |
+| Auth pages (login / signup / forgot-password / update-password / confirm / callback) | ✅ Complete |
+| Auth queries, mutations, validation (TanStack Query + Arktype + Sentry) | ✅ Complete |
+| Middleware session protection | ✅ Complete |
+| Landing page | 🔜 In progress |
+| Dark / light / system theme | ✅ Done |
+| Sentry error monitoring (Replay, Feedback, tracing) | ✅ Complete |
+| Developer tooling (Biome, typecheck, React Query devtools) | ✅ Configured |
+| Database schema & migrations | 📋 Planned |
+| Dashboard / app shell (post-login) | 📋 Planned |
+| Workflow builder | 📋 Planned |
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org/) (canary) |
+| **UI** | [React 19](https://react.dev/), [shadcn/ui](https://ui.shadcn.com/) (Radix Nova), [Tabler Icons](https://tabler.io/icons) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/), oklch CSS variables |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) (strict) |
+| **Runtime** | [Bun](https://bun.sh/) |
+| **Linter / Formatter** | [Biome](https://biomejs.dev/) v2.x |
+| **Animation** | `tw-animate-css` |
+
+## Integrations
+
+- **Supabase** — Auth (session middleware, server + browser clients), PostgreSQL
+- **Sentry** — Error monitoring with session replay, performance tracing
+- **Vercel** — Deployed with Analytics & Speed Insights
 
 ## Scripts
 
@@ -23,6 +51,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `bun run format` | Format with Biome |
 | `bun run typecheck` | Run TypeScript type checking |
 
+## Design System
+
+- **Primary color:** Warm gold / honey amber (oklch color space)
+- **Fonts:** Source Sans 3 (body) + Geist Mono (code)
+- **Theme:** Dark/light mode via `next-themes`, toggle with <kbd>d</kbd> key
+
 ## Adding shadcn/ui components
 
 ```bash
@@ -34,11 +68,3 @@ Components are placed in `components/ui/` and imported as:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
-
-## Stack
-
-- **Framework**: Next.js 16 (canary)
-- **UI**: React 19, shadcn/ui (Radix Nova)
-- **Styling**: Tailwind CSS v4, CSS variables (oklch)
-- **Icons**: Tabler Icons
-- **Tooling**: Biome (linter + formatter), TypeScript (strict), Bun
