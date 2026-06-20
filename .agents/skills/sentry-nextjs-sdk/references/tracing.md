@@ -332,6 +332,11 @@ Sentry.init({
 });
 ```
 
+> **Note:** `beforeSendSpan` modifies individual spans. To filter or modify entire
+> transactions (e.g. drop `/api/health` traces), use `beforeSendTransaction` instead
+> (see error-monitoring.md). When using `traceLifecycle: 'stream'`, wrap the callback
+> with `withStreamedSpan()` from `@sentry/nextjs`.
+
 ---
 
 ## Server Actions — `withServerActionInstrumentation()`
