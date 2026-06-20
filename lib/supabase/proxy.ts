@@ -81,6 +81,7 @@ export async function updateSession(request: NextRequest) {
   if (claimsData?.claims?.sub && isAuthPage) {
     const sessionAllowedAuthPaths = [
       "/update-password",
+      "/error",
       "/confirm",
       "/auth/callback",
     ];
